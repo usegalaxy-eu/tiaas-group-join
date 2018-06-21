@@ -11,7 +11,8 @@ import yaml
 
 app = Flask(__name__)
 
-with open(os.path.join(app.root_path, 'config.yaml')) as f:
+default_path = os.path.join(app.root_path, 'config.yaml')
+with open(os.environ.get('CONFIG_PATH', default_path), 'r') as f:
     c = yaml.load(f)
     for key in c.keys():
         app.config[key] = c[key]
