@@ -2,7 +2,7 @@ from flask import Flask
 from bioblend import galaxy
 import codecs
 from functools import wraps
-from flask import redirect, make_response, jsonify
+from flask import redirect, make_response
 from flask import request, abort
 from flask_sqlalchemy import SQLAlchemy
 from Crypto.Cipher import Blowfish
@@ -21,26 +21,31 @@ with open(os.path.join(app.root_path, 'config.yaml')) as f:
 app.config['SQLALCHEMY_DATABASE_URI'] = app.config['db']
 db = SQLAlchemy(app)
 cipher = Blowfish.new(app.config['galaxy']['idsecret'])
+gi = app.config['gi']
+
+
+def unauthorized(message="Unauthorized"):
+    return abort(make_response(message, 401))
 
 
 def authenticate():
     def wrapper(f):
         @wraps(f)
         def wrapped(*args, **kwargs):
-            try:
-                galaxy_encoded_session_id = codecs.decode(request.cookies[app.config['galaxy']['cookiename']], 'hex')
-                galaxy_session_id = cipher.decrypt(galaxy_encoded_session_id).decode('utf-8').lstrip('!')
-                results = db.engine.execute("select user_id from galaxy_session where session_key = '%s'" % galaxy_session_id)
-                user_id = list(results)[0][0]
-                # Now, encode it.
-                s = str.encode(str(user_id))
-                s = (b"!" * (8 - len(s) % 8)) + s
-                user_id = codecs.encode(cipher.encrypt(s), 'hex')
-                # Wipe out / overwrite user_id
-                kwargs['user_id'] = user_id.decode('utf-8')
-            except Exception as e:
-                print(e)
-                return abort(make_response(jsonify(message="Unauthorized"), 401))
+            galaxy_encoded_session_id = codecs.decode(request.cookies[app.config['galaxy']['cookiename']], 'hex')
+            galaxy_session_id = cipher.decrypt(galaxy_encoded_session_id).decode('utf-8').lstrip('!')
+            results = db.engine.execute("select user_id from galaxy_session where session_key = '%s'" % galaxy_session_id)
+            user_id = list(results)[0][0]
+            if user_id is None:
+                return unauthorized("Please log in to Galaxy first")
+
+            # Now, encode it.
+            s = str.encode(str(user_id))
+            s = (b"!" * (8 - len(s) % 8)) + s
+            user_id = codecs.encode(cipher.encrypt(s), 'hex')
+            # Wipe out / overwrite user_id
+            kwargs['user_id'] = user_id.decode('utf-8')
+
             return f(*args, **kwargs)
         return wrapped
     return wrapper
@@ -49,6 +54,9 @@ def authenticate():
 @app.route('/join-training/<training_id>', methods=['GET'])
 @authenticate()
 def notify(training_id, user_id=None):
+    if not user_id:
+        return unauthorized()
+
     # Try and catch common mistakes
     training_id = training_id.lower()
 
@@ -59,7 +67,6 @@ def notify(training_id, user_id=None):
     training_role_name = 'training-%s' % training_id
     # Otherwise, training is OK + they are a valid user.
     # We need to add them to the role
-    gi = app.config['gi']
 
     ################
     # BEGIN UNSAFE #
