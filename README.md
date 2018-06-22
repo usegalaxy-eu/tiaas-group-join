@@ -39,6 +39,9 @@ trainings:
     - denbi-summer-school
 ```
 
+## Deploying
+
+- [Ansible Role](https://github.com/usegalaxy-eu/ansible-tiaas-group-join/)
 
 ## License
 
