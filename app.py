@@ -20,6 +20,7 @@ with open(os.environ.get('CONFIG_PATH', default_path), 'r') as f:
     app.config['gi'] = galaxy.GalaxyInstance(**app.config['galaxy']['api'])
 
 app.config['SQLALCHEMY_DATABASE_URI'] = app.config['db']
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 cipher = Blowfish.new(app.config['galaxy']['idsecret'])
 gi = app.config['gi']
