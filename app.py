@@ -60,7 +60,7 @@ def authenticate():
 
 @app.route('/join-training/<training_id>', methods=['GET'])
 @authenticate()
-def notify(training_id, user_id=None):
+def join_training(training_id, user_id=None):
     if not user_id:
         return unauthorized()
 
