@@ -1,0 +1,37 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<meta name="viewport" content="maximum-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+	<title>Galaxy TIaaS</title>
+	<link href="{{ config.galaxy.api.url }}/static/style/base.css?v=1535407305" media="screen" rel="stylesheet" type="text/css" />
+
+	<style type="text/css" media="all">
+		#masthead {
+			padding: 0;
+			margin-bottom: 0px;
+			background-color: #2c3143;
+			height: 2.5rem;
+		}
+	</style>
+</head>
+
+<body scroll="no" class="full-content ">
+	<div id="everything">
+		<nav id="masthead" class="navbar navbar-expand justify-content-center navbar-dark">
+			<a class="navbar-brand" href="/">
+				<span class="navbar-brand-title">Galaxy Training Infrastructure as a Service</span>
+			</a>
+		</nav>
+
+		<div id="columns">
+			<div id="center" class="inbound" style='padding-top: 1em;'>
+				{% block content %}
+				{% endblock %}
+			</div><!--end center-->
+		</div><!--end columns-->
+	</div><!--end everything-->
+	<div id="dd-helper" style="display: none;"></div>
+</body>
+</html>

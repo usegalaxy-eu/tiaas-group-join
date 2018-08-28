@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+{% if welcome_to %}
+<div class="donemessage">
+	Congratulations: you are successfully registered in <b>{{ welcome_to }}</b><br/>
+	<a href="{{ config.galaxy.api.url }}">Return to Galaxy</a>
+</div>
+{% endif %}
+
+{% endblock %}

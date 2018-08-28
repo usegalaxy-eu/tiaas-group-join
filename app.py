@@ -2,7 +2,7 @@ from flask import Flask
 from bioblend import galaxy
 import codecs
 from functools import wraps
-from flask import redirect, make_response
+from flask import redirect, make_response, render_template
 from flask import request, abort
 from flask_sqlalchemy import SQLAlchemy
 from Crypto.Cipher import Blowfish
@@ -28,11 +28,8 @@ gi = app.config['gi']
 LOGIN_FAILURE = """Please log in to Galaxy first: <a href='{url}/login'>{url}/login</a>""".format(url=app.config['galaxy']['api']['url'])
 
 
-def unauthorized(message="Unauthorized", html=False):
-    if html:
-        message = '<html><head></head><body>' + message + '</body></html>'
-
-    return abort(make_response(message, 401))
+def unauthorized(message="Unauthorized"):
+    return template('error.html', message=message), 401
 
 
 def authenticate():
@@ -40,18 +37,18 @@ def authenticate():
         @wraps(f)
         def wrapped(*args, **kwargs):
             if app.config['galaxy']['cookiename'] not in request.cookies:
-                return unauthorized(LOGIN_FAILURE, html=True)
+                return unauthorized(LOGIN_FAILURE)
             galaxy_encoded_session_id = codecs.decode(request.cookies[app.config['galaxy']['cookiename']], 'hex')
             galaxy_session_id = cipher.decrypt(galaxy_encoded_session_id).decode('utf-8').lstrip('!')
             results = db.engine.execute("select user_id from galaxy_session where session_key = '%s'" % galaxy_session_id)
             users = list(results)
             if len(users) == 0:
-                return unauthorized(LOGIN_FAILURE, html=True)
+                return unauthorized(LOGIN_FAILURE)
             user = users[0]
             # fetch user_id attr
             user_id = user[0]
             if user_id is None:
-                return unauthorized(LOGIN_FAILURE, html=True)
+                return unauthorized(LOGIN_FAILURE)
 
             # Now, encode it.
             s = str.encode(str(user_id))
@@ -65,9 +62,18 @@ def authenticate():
     return wrapper
 
 
+def template(name, **context):
+    return render_template(name, config=app.config, **context)
+
+# @app.route('/join-training/about', methods=['GET'])
+# @authenticate()
+# def about(user_id=None, user_name=None):
+    # return template('me.html', user_id=user_id, user_name=user_name)
+
+
 @app.route('/join-training/<training_id>', methods=['GET'])
 @authenticate()
-def join_training(training_id, user_id=None):
+def join_training(training_id, user_id=None, user_name=None):
     if not user_id:
         return unauthorized()
 
@@ -76,7 +82,7 @@ def join_training(training_id, user_id=None):
 
     # If we don't know this training, reject
     if training_id not in app.config['trainings']:
-        return 'Unknown training. Please check the URL.'
+        return template('error.html', message='Unknown training. Please check the URL'), 404
 
     training_role_name = 'training-%s' % training_id
     # Otherwise, training is OK + they are a valid user.
@@ -112,4 +118,5 @@ def join_training(training_id, user_id=None):
     # print('Adding %s to %s (%s)' % (user_id, group_id, training_role_name))
     gi.groups.add_group_user(group_id, user_id)
 
-    return redirect(app.config['galaxy']['api']['url'], code=302)
+    # return redirect('/join-training/about?registered=%s' % training_id, code=302)
+    return template('me.html', user_id=user_id, user_name=user_name, welcome_to=training_id)
