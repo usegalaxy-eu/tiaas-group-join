@@ -25,6 +25,8 @@ db = SQLAlchemy(app)
 cipher = Blowfish.new(app.config['galaxy']['idsecret'])
 gi = app.config['gi']
 
+LOGIN_FAILURE = """Please log in to Galaxy first: <a href='{url}/login'>{url}/login</a>""".format(url=app.config['galaxy']['api']['url'])
+
 
 def unauthorized(message="Unauthorized", html=False):
     if html:
@@ -38,13 +40,18 @@ def authenticate():
         @wraps(f)
         def wrapped(*args, **kwargs):
             if app.config['galaxy']['cookiename'] not in request.cookies:
-                return unauthorized("Please log in to Galaxy first: <a href='https://usegalaxy.eu/login'>https://usegalaxy.eu/login</a>", html=True)
+                return unauthorized(LOGIN_FAILURE, html=True)
             galaxy_encoded_session_id = codecs.decode(request.cookies[app.config['galaxy']['cookiename']], 'hex')
             galaxy_session_id = cipher.decrypt(galaxy_encoded_session_id).decode('utf-8').lstrip('!')
             results = db.engine.execute("select user_id from galaxy_session where session_key = '%s'" % galaxy_session_id)
-            user_id = list(results)[0][0]
+            users = list(results)
+            if len(users) == 0:
+                return unauthorized(LOGIN_FAILURE, html=True)
+            user = users[0]
+            # fetch user_id attr
+            user_id = user[0]
             if user_id is None:
-                return unauthorized("Please log in to Galaxy first: <a href='https://usegalaxy.eu/login'>https://usegalaxy.eu/login</a>", html=True)
+                return unauthorized(LOGIN_FAILURE, html=True)
 
             # Now, encode it.
             s = str.encode(str(user_id))
@@ -105,4 +112,4 @@ def join_training(training_id, user_id=None):
     # print('Adding %s to %s (%s)' % (user_id, group_id, training_role_name))
     gi.groups.add_group_user(group_id, user_id)
 
-    return redirect(app.config['redirect_location'], code=302)
+    return redirect(app.config['galaxy']['api']['url'], code=302)
