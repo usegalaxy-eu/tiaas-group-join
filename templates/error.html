@@ -3,6 +3,6 @@
 {% block content %}
 <h1>Error</h1>
 <div class="errormessage">
-	{{ message }}
+	{{ message | safe }}
 </div>
 {% endblock %}

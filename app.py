@@ -2,8 +2,8 @@ from flask import Flask
 from bioblend import galaxy
 import codecs
 from functools import wraps
-from flask import redirect, make_response, render_template
-from flask import request, abort
+from flask import render_template
+from flask import request
 from flask_sqlalchemy import SQLAlchemy
 from Crypto.Cipher import Blowfish
 import os
@@ -25,7 +25,7 @@ db = SQLAlchemy(app)
 cipher = Blowfish.new(app.config['galaxy']['idsecret'])
 gi = app.config['gi']
 
-LOGIN_FAILURE = """Please log in to Galaxy first: <a href='{url}/login'>{url}/login</a>""".format(url=app.config['galaxy']['api']['url'])
+LOGIN_FAILURE = """Please log in to Galaxy first: <a href="{url}/login">{url}/login</a>""".format(url=app.config['galaxy']['api']['url'])
 
 
 def unauthorized(message="Unauthorized"):
