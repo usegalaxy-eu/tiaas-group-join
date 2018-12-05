@@ -19,6 +19,8 @@ with open(os.environ.get('CONFIG_PATH', default_path), 'r') as f:
 
     app.config['gi'] = galaxy.GalaxyInstance(**app.config['galaxy']['api'])
 
+# Make things safe for whatever they enter
+app.config['trainings'] = [x.lower() for x in app.config['trainings']]
 app.config['SQLALCHEMY_DATABASE_URI'] = app.config['db']
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
