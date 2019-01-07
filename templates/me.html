@@ -7,6 +7,34 @@
 	Congratulations: you are successfully registered in <b>{{ welcome_to }}</b><br/>
 	<a href="{{ config.galaxy.api.url }}">Return to Galaxy</a>
 </div>
+{% endif %}
+
+{% if not active %}
+<div class="errormessage">
+	Your account is not active. You will not be able to run jobs until it is activated.
+	<p>
+	Hello {{ user_name }},
+	</p>
+	<p>
+	In order to complete the activation process, please click on the following link
+	to verify your account: <a href="https://usegalaxy.eu/activate?activation_token={{ activation_token }}&email={{ user_email }}">Activate</a>
+	</p>
+	<p>
+	By clicking on the above link and opening a Galaxy account you are also
+	confirming that you have read and agreed to Galaxy's Terms and Conditions for
+	use of this service (<a href="https://usegalaxy.eu/terms">https://usegalaxy.eu/terms</a>). This includes a quota limit of one account per user.
+	Attempts to subvert this limit by creating multiple accounts or through any
+	other method may result in termination of all associated accounts and data.
+	</p>
+	<p>
+	Please contact us if you need help with your account at: contact@usegalaxy.eu. You can also
+	browse resources available at: https://galaxyproject.org/.
+	More about the Galaxy Project can be found at galaxyproject.org
+	</p>
+Your Galaxy Team
+</div>
+{% endif %}
+
 
 <h2>How It Works</h2>
 <p>
@@ -17,6 +45,5 @@ period of the training event, will "prefer" to run on this machine. If there is
 no room on that machine, they will run on any other machine in our cluster with
 resources.
 </p>
-{% endif %}
 
 {% endblock %}

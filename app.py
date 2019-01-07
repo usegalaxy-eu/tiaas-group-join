@@ -34,6 +34,14 @@ def unauthorized(message="Unauthorized"):
     return template('error.html', message=message), 401
 
 
+def activation_token(user_id):
+    results = db.engine.execute("select activation_token, active from galaxy_user where id = '%s'" % user_id)
+    tokens = list(results)
+    if len(tokens) == 0:
+        return None
+    return tokens[0]
+
+
 def authenticate():
     def wrapper(f):
         @wraps(f)
@@ -42,22 +50,31 @@ def authenticate():
                 return unauthorized(LOGIN_FAILURE)
             galaxy_encoded_session_id = codecs.decode(request.cookies[app.config['galaxy']['cookiename']], 'hex')
             galaxy_session_id = cipher.decrypt(galaxy_encoded_session_id).decode('utf-8').lstrip('!')
-            results = db.engine.execute("select user_id from galaxy_session where session_key = '%s'" % galaxy_session_id)
+            results = db.engine.execute("""
+                SELECT
+                    galaxy_session.user_id, galaxy_user.username, galaxy_user.email
+                FROM
+                    galaxy_session, galaxy_user
+                WHERE
+                    session_key = '%s'
+                    AND galaxy_session.user_id = galaxy_user.id
+            """ % galaxy_session_id)
             users = list(results)
             if len(users) == 0:
                 return unauthorized(LOGIN_FAILURE)
             user = users[0]
+
             # fetch user_id attr
-            user_id = user[0]
-            if user_id is None:
-                return unauthorized(LOGIN_FAILURE)
+            (user_id, user_name, email) = user[0]
 
             # Now, encode it.
             s = str.encode(str(user_id))
             s = (b"!" * (8 - len(s) % 8)) + s
-            user_id = codecs.encode(cipher.encrypt(s), 'hex')
-            # Wipe out / overwrite user_id
-            kwargs['user_id'] = user_id.decode('utf-8')
+            encoded_user_id = codecs.encode(cipher.encrypt(s), 'hex')
+            kwargs['user_id'] = user_id
+            kwargs['user_id_api'] = encoded_user_id.decode('utf-8')
+            kwargs['user_name'] = user_name.decode('utf-8')
+            kwargs['user_email'] = email.decode('utf-8')
 
             return f(*args, **kwargs)
         return wrapped
@@ -67,15 +84,10 @@ def authenticate():
 def template(name, **context):
     return render_template(name, config=app.config, **context)
 
-# @app.route('/join-training/about', methods=['GET'])
-# @authenticate()
-# def about(user_id=None, user_name=None):
-    # return template('me.html', user_id=user_id, user_name=user_name)
-
 
 @app.route('/join-training/<training_id>', methods=['GET'])
 @authenticate()
-def join_training(training_id, user_id=None, user_name=None):
+def join_training(training_id, user_id=None, user_id_api=None, user_name=None, user_email=None):
     if not user_id:
         return unauthorized()
 
@@ -117,8 +129,9 @@ def join_training(training_id, user_id=None, user_name=None):
     gi.groups.add_group_role(group_id, role_id)
 
     # Lastly, add the user to the group
-    # print('Adding %s to %s (%s)' % (user_id, group_id, training_role_name))
-    gi.groups.add_group_user(group_id, user_id)
+    # print('Adding %s to %s (%s)' % (user_id_api, group_id, training_role_name))
+    gi.groups.add_group_user(group_id, user_id_api)
 
     # return redirect('/join-training/about?registered=%s' % training_id, code=302)
-    return template('me.html', user_id=user_id, user_name=user_name, welcome_to=training_id)
+    token, active = activation_token(user_id)
+    return template('me.html', user_name=user_name, user_email=user_email, welcome_to=training_id, active=active, activation_token=token)
