@@ -51,6 +51,7 @@ WHERE
                         )
 ORDER BY
         job.create_time DESC
+LIMIT 300
 """
 
 
