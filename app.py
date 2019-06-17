@@ -37,7 +37,7 @@ FROM
         job, galaxy_user
 WHERE
         job.user_id = galaxy_user.id
-        AND job.create_time > (now() AT TIME ZONE 'UTC' - '6 hours'::interval)
+        AND job.create_time > (now() AT TIME ZONE 'UTC' - '3 hours'::interval)
         AND galaxy_user.id
                 IN (
                                 SELECT
