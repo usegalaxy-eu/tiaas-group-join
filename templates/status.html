@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Created</th>
+            <th>User</th>
+            <th>Tool</th>
+            <th>State</th>
+            <th>Job Runner ID</th>
+        </tr>
+    </thead>
+    {% for row in jobs %}
+        <tr>
+            <td class="dataset state-{{row.state}}">{{ row.create_time }}</td>
+            <td class="dataset state-{{row.state}}">{{ row.user_id }}</td>
+            <td class="dataset state-{{row.state}}">{{ row.tool_id }}</td>
+            <td class="dataset state-{{row.state}}">{{ row.state }}</td>
+            <td class="dataset state-{{row.state}}">{{ row.job_runner_external_id}}</td>
+        </tr>
+    {% endfor %}
+</table>
+
+<p>
+This page gives you a brief overview of the current status of the trainees. Please note the following:
+</p>
+<ul>
+    <li>Only jobs created in the last 3 hours are shown</li>
+    <li>This includes jobs they run outside of the context of the course (as we cannot tell which are which.)</li>
+    <li>The username is essentially random but will be consistent within a one day period</li>
+</ul>
+
+{% endblock %}
