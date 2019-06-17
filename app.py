@@ -196,9 +196,10 @@ def training_status(training_id, user_id=None, user_name=None):
                 'new': 0,
                 'error': 0,
                 'queued': 0,
+                'running': 0,
             }
 
-        if job['state'] in ('ok', 'new', 'error', 'queued'):
+        if job['state'] in ('ok', 'new', 'error', 'queued', 'running'):
             jobs_overview[tool_id][job['state']] += 1
 
         if job['state'] not in state_summary:
