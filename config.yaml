@@ -1,0 +1,14 @@
+---
+DEBUG: False
+
+db: 'postgresql://postgres:postgres@localhost/postgres?sslmode=disable'
+# Where to send them once they've successfully joined the training
+redirect_location: 'https://usegalaxy.eu'
+activate: 'show_link'
+
+galaxy:
+    cookiename: galaxysession
+    idsecret: 'USING THE DEFAULT IS NOT SECURE!'
+
+trainings:
+    - asdf

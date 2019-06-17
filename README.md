@@ -1,3 +1,5 @@
+![](./images/logo.png)
+
 # TIaaS / Galaxy Group Join Service
 
 This is a simple service which allows users visiting a specific URL like:
@@ -12,6 +14,12 @@ path prefix of Galaxy and so having access to the Galaxy session cookie. This
 is decoded into a user id + the part after `/join-training/` decoded into a
 group name, and this change is made.
 
+## Status Page
+
+For teachers giving trainings, we now offer a "status" page where they can see
+the training queue of their class.
+
+![](images/queue-status.png)
 
 ## Configuration
 
@@ -29,10 +37,6 @@ redirect_location: 'http://localhost'
 galaxy:
     cookiename: galaxysession
     idsecret: 'some very secret key'
-
-    api:
-        url: "http://localhost"
-        key: "deadbeefcafe"
 
 # List of valid training identifiers
 trainings:
