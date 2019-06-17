@@ -185,4 +185,24 @@ def join_training(training_id, user_id=None, user_name=None):
 @authenticate()
 #@require_admin
 def training_status(training_id, user_id=None, user_name=None):
-    return template('status.html', jobs=list(get_jobs(training_id)))
+    jobs = list(get_jobs(training_id))
+    jobs_overview = {}
+    state_summary = {}
+    for job in jobs:
+        tool_id = job['tool_id']
+        if tool_id not in jobs_overview:
+            jobs_overview[tool_id] = {
+                'ok': 0,
+                'new': 0,
+                'error': 0,
+                'queued': 0,
+            }
+
+        if job['state'] in ('ok', 'new', 'error', 'queued'):
+            jobs_overview[tool_id][job['state']] += 1
+
+        if job['state'] not in state_summary:
+            state_summary[job['state']] = 0
+        state_summary[job['state']] += 1
+
+    return template('status.html', jobs=jobs, job_summary=jobs_overview, state_summary=state_summary)
