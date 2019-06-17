@@ -19,7 +19,7 @@ group name, and this change is made.
 For teachers giving trainings, we now offer a "status" page where they can see
 the training queue of their class.
 
-![](images/queue-status.jpg)
+![](images/queue-status.png)
 
 ## Configuration
 
