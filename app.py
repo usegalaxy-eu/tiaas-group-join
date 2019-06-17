@@ -30,7 +30,7 @@ TRAINING_QUEUE_QUERY = """
 SELECT
         job.state,
         job.job_runner_external_id AS extid,
-        job.tool_id,
+        regexp_replace(job.tool_id, '.*toolshed.*/repos/', ''),
         substring(md5(COALESCE(galaxy_user.username, 'Anonymous') || now()::date), 0, 12),
         date_trunc('second', job.create_time) AS created
 FROM
