@@ -3,7 +3,6 @@ import codecs
 from functools import wraps
 from flask import render_template
 from flask import request
-from flask import redirect
 from flask_sqlalchemy import SQLAlchemy
 from Crypto.Cipher import Blowfish
 import os
@@ -134,10 +133,6 @@ def create_group(training_id, role_id):
 def add_group_user(group_id, user_id):
     db.engine.execute("insert into user_group_association (user_id, group_id, create_time, update_time) values (%s, %s, now(), now())" % (user_id, group_id))
 
-
-@app.route('/join-training/<training_id>/', methods=['GET'])
-def join_training_slash(training_id):
-    return redirect('/join-training/%s' % training_id, code=302)
 
 @app.route('/join-training/<training_id>', methods=['GET'])
 @authenticate()
