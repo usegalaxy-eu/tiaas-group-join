@@ -22,10 +22,12 @@
 				</tr>
 			</thead>
 			{% for state, count  in state_summary.items() %}
+				{% if state != '__total__' %}
 				<tr>
 					<td>{{ state }}</td>
-					<td>{{ count }}</td>
+					<td style="background: rgba(128, 128, 128, {{ count / state_summary.__total__ }});">{{ count }}</td>
 				</tr>
+				{% endif %}
 			{% endfor %}
 		</table>
 	</div>
@@ -45,11 +47,11 @@
 			{% for tool, states in job_summary.items() %}
 				<tr>
 					<td>{{ tool }}</td>
-					<td>{{ states.new }}</td>
-					<td>{{ states.queued }}</td>
-					<td>{{ states.running }}</td>
-					<td>{{ states.ok }}</td>
-					<td>{{ states.error }}</td>
+					<td style="background: rgba(128, 128, 128, {{ states.new / states.__total__ }});">{{ states.new }}</td>
+					<td style="background: rgba(128, 128, 128, {{ states.queued / states.__total__ }});">{{ states.queued }}</td>
+					<td style="background: rgba(128, 128, 128, {{ states.running / states.__total__ }});">{{ states.running }}</td>
+					<td style="background: rgba(128, 128, 128, {{ states.ok / states.__total__ }});">{{ states.ok }}</td>
+					<td style="background: rgba(128, 128, 128, {{ states.error / states.__total__ }});">{{ states.error }}</td>
 				</tr>
 			{% endfor %}
 		</table>

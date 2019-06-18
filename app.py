@@ -197,13 +197,18 @@ def training_status(training_id, user_id=None, user_name=None):
                 'error': 0,
                 'queued': 0,
                 'running': 0,
+                '__total__': 0,
             }
 
         if job['state'] in ('ok', 'new', 'error', 'queued', 'running'):
             jobs_overview[tool_id][job['state']] += 1
+            jobs_overview[tool_id]['__total__'] += 1
 
         if job['state'] not in state_summary:
             state_summary[job['state']] = 0
+        if '__total__' not in state_summary:
+            state_summary['__total__'] = 0
         state_summary[job['state']] += 1
+        state_summary['__total__'] += 1
 
     return template('status.html', jobs=jobs, job_summary=jobs_overview, state_summary=state_summary)
