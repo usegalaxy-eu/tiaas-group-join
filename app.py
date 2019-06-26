@@ -23,7 +23,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 cipher = Blowfish.new(app.config['galaxy']['idsecret'])
 
-LOGIN_FAILURE = """Please log in to Galaxy first: <a href="{url}/login">{url}/login</a>""".format(url=app.config['redirect_location'])
+LOGIN_FAILURE = """Please log in to Galaxy first: <a href="https://{host}/login">{url}/login</a>""".format(url=app.config['redirect_location'], host=request.host)
 
 TRAINING_QUEUE_HEADERS = ['state', 'job_runner_external_id', 'tool_id', 'user_id', 'create_time']
 TRAINING_QUEUE_QUERY = """
@@ -93,7 +93,7 @@ def authenticate():
 
 
 def template(name, **context):
-    return render_template(name, config=app.config, **context)
+    return render_template(name, host=request.host, config=app.config, **context)
 
 
 def get_roles():
