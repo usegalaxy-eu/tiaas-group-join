@@ -23,8 +23,6 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 cipher = Blowfish.new(app.config['galaxy']['idsecret'])
 
-LOGIN_FAILURE = """Please log in to Galaxy first: <a href="https://{host}/login">{url}/login</a>""".format(url=app.config['redirect_location'], host=request.host)
-
 TRAINING_QUEUE_HEADERS = ['state', 'job_runner_external_id', 'tool_id', 'user_id', 'create_time']
 TRAINING_QUEUE_QUERY = """
 SELECT
@@ -67,6 +65,8 @@ def authenticate():
     def wrapper(f):
         @wraps(f)
         def wrapped(*args, **kwargs):
+            LOGIN_FAILURE = """Please log in to Galaxy first: <a href="https://{host}/login">{url}/login</a>""".format(url=app.config['redirect_location'], host=request.host)
+
             if app.config['galaxy']['cookiename'] not in request.cookies:
                 return unauthorized(LOGIN_FAILURE)
             galaxy_encoded_session_id = codecs.decode(request.cookies[app.config['galaxy']['cookiename']], 'hex')
