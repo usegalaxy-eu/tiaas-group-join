@@ -65,7 +65,7 @@ def authenticate():
     def wrapper(f):
         @wraps(f)
         def wrapped(*args, **kwargs):
-            LOGIN_FAILURE = """Please log in to Galaxy first: <a href="https://{host}/login">{url}/login</a>""".format(url=app.config['redirect_location'], host=request.host)
+            LOGIN_FAILURE = """Please log in to Galaxy first: <a href="https://{host}/login">{host}/login</a>""".format(host=request.host)
 
             if app.config['galaxy']['cookiename'] not in request.cookies:
                 return unauthorized(LOGIN_FAILURE)
