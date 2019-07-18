@@ -2,6 +2,6 @@ bioblend==0.12.0
 Flask==1.1.1
 Flask-SQLAlchemy==2.4.0
 gunicorn==19.9.0
-psycopg2==2.8.3
+psycopg2-binary==2.8.3
 pycrypto==2.6.1
 PyYAML==5.1.1
