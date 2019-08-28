@@ -253,7 +253,8 @@ def training_status(training_id, user_id=None, user_name=None):
                 "error": 0,
                 "queued": 0,
                 "running": 0,
-                "__total__": 0,
+                # prevent div 0
+                "__total__": 1,
             }
 
         if job["state"] in ("ok", "new", "error", "queued", "running"):
@@ -263,7 +264,9 @@ def training_status(training_id, user_id=None, user_name=None):
         if job["state"] not in state_summary:
             state_summary[job["state"]] = 0
         if "__total__" not in state_summary:
-            state_summary["__total__"] = 0
+            # div 0
+            state_summary["__total__"] = 1
+
         state_summary[job["state"]] += 1
         state_summary["__total__"] += 1
 
