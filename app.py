@@ -5,10 +5,12 @@ from flask import render_template
 from flask import request
 from flask_sqlalchemy import SQLAlchemy
 from Crypto.Cipher import Blowfish
+from flask_moment import Moment
 import os
 import yaml
 
 app = Flask(__name__)
+moment = Moment(app)
 
 default_path = os.path.join(app.root_path, "config.yaml")
 with open(os.environ.get("CONFIG_PATH", default_path), "r") as f:
@@ -41,7 +43,7 @@ FROM
         job, galaxy_user
 WHERE
         job.user_id = galaxy_user.id
-        AND job.create_time > (now() AT TIME ZONE 'UTC' - '3 hours'::interval)
+        AND job.create_time > (now() AT TIME ZONE 'UTC' - '%s hours'::interval)
         AND galaxy_user.id
                 IN (
                                 SELECT
@@ -133,9 +135,8 @@ def create_role(training_id):
     return -1
 
 
-def get_jobs(training_id):
-    jobs = db.engine.execute(TRAINING_QUEUE_QUERY % training_id)
-    print(TRAINING_QUEUE_QUERY % training_id)
+def get_jobs(training_id, hours):
+    jobs = db.engine.execute(TRAINING_QUEUE_QUERY % (hours, training_id))
     for job in jobs:
         yield dict(zip(TRAINING_QUEUE_HEADERS, job))
 
@@ -231,7 +232,16 @@ def join_training(training_id, user_id=None, user_name=None):
 @authenticate()
 # @require_admin
 def training_status(training_id, user_id=None, user_name=None):
-    jobs = list(get_jobs(training_id))
+    # hours param
+    hours = int(request.args.get('hours', 3))
+    if hours > 64:
+        hours = 64
+    elif hours < 1:
+        hours = 1
+    # autorefresh
+    refresh = 'refresh' in request.args
+
+    jobs = list(get_jobs(training_id, hours))
     jobs_overview = {}
     state_summary = {}
     for job in jobs:
@@ -257,6 +267,7 @@ def training_status(training_id, user_id=None, user_name=None):
         state_summary[job["state"]] += 1
         state_summary["__total__"] += 1
 
+    print(refresh)
     return template(
-        "status.html", jobs=jobs, job_summary=jobs_overview, state_summary=state_summary
+        "status.html", jobs=jobs, job_summary=jobs_overview, state_summary=state_summary, refresh=refresh
     )

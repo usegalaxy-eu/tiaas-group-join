@@ -72,7 +72,7 @@
 	{% for row in jobs %}
 		<tr>
 			<td class="dataset" style="background: #{{ row.user_id[0:6] }}">{{ row.user_id[0:6] }}</td>
-			<td class="dataset state-{{row.state}}">{{ row.create_time }}</td>
+			<td class="dataset state-{{row.state}}">{{ moment(row.create_time).format('hh:mm:ss') }}</td>
 			<td class="dataset state-{{row.state}}">{{ row.tool_id }}</td>
 			<td class="dataset state-{{row.state}}">{{ row.state }}</td>
 			<td class="dataset state-{{row.state}}">{{ row.job_runner_external_id}}</td>

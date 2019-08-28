@@ -1,5 +1,6 @@
 bioblend==0.12.0
 Flask==1.1.1
+Flask-Moment==0.9.0
 Flask-SQLAlchemy==2.4.0
 gunicorn==19.9.0
 psycopg2-binary==2.8.3
