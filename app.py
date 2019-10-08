@@ -60,6 +60,25 @@ ORDER BY
 LIMIT 300
 """
 
+TRAINING_USERS_QUERY = """
+SELECT
+        substring(md5(COALESCE(galaxy_user.username, 'Anonymous') || now()::date), 0, 12)
+FROM
+        galaxy_user
+WHERE
+        galaxy_user.id
+                IN (
+                                SELECT
+                                        galaxy_user.id
+                                FROM
+                                        galaxy_user, user_group_association, galaxy_group
+                                WHERE
+                                        galaxy_group.name = 'training-%s'
+                                        AND galaxy_group.id = user_group_association.group_id
+                                        AND user_group_association.user_id = galaxy_user.id
+                        )
+"""
+
 
 def unauthorized(message="Unauthorized"):
     return template("error.html", message=message), 401
@@ -139,6 +158,12 @@ def get_jobs(training_id, hours):
     jobs = db.engine.execute(TRAINING_QUEUE_QUERY % (hours, training_id))
     for job in jobs:
         yield dict(zip(TRAINING_QUEUE_HEADERS, job))
+
+
+def get_users(training_id):
+    users = db.engine.execute(TRAINING_USERS_QUERY % training_id)
+    for user in users:
+        yield user[0]
 
 
 def get_groups():
@@ -242,6 +267,7 @@ def training_status(training_id, user_id=None, user_name=None):
     refresh = 'refresh' in request.args
 
     jobs = list(get_jobs(training_id, hours))
+    users = list(get_users(training_id))
     jobs_overview = {}
     state_summary = {}
     for job in jobs:
@@ -272,5 +298,5 @@ def training_status(training_id, user_id=None, user_name=None):
 
     print(refresh)
     return template(
-        "status.html", jobs=jobs, job_summary=jobs_overview, state_summary=state_summary, refresh=refresh
+        "status.html", jobs=jobs, job_summary=jobs_overview, state_summary=state_summary, refresh=refresh, users=users
     )

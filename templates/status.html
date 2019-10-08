@@ -40,6 +40,16 @@
 		</table>
 	</div>
 	<div class="col-md-9 col-sm-12">
+		<h3>Students</h3>
+		<div>
+		{{ users | length }} Registered
+		</div>
+		<div style="padding-top: 1em;padding-bottom: 1em">
+		{% for user in users %}
+			<span style="background: #{{ user[0:6] }};padding: 0.3em">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>&nbsp;
+		{% endfor %}
+		</div>
+
 		<h3>Overview by Tool</h3>
 		<table class="table">
 			<thead>
