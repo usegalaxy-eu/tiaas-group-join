@@ -254,9 +254,8 @@ def join_training(training_id, user_id=None, user_name=None):
 
 
 @app.route("/join-training/<training_id>/status", methods=["GET"])
-@authenticate()
 # @require_admin
-def training_status(training_id, user_id=None, user_name=None):
+def training_status(training_id):
     # hours param
     hours = int(request.args.get('hours', 3))
     if hours > 64:
