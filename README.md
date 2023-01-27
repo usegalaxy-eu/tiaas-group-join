@@ -1,3 +1,5 @@
+[Replaced by galaxyproject/tiaas2](https://github.com/galaxyproject/tiaas2)
+
 ![](./images/logo.png)
 
 # TIaaS / Galaxy Group Join Service
